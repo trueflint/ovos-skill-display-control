@@ -1,0 +1,15 @@
+{
+    "skill_id": "ovos-skill-display-control.openvoiceos",
+    "name": "Display Control",
+    "description": "Skill to allow voice control of the OS screen",
+    "examples": [
+	"display off",
+	"turn the monitor on",
+	"turn off the screen"
+    ],
+    "tags": [
+	"display",
+	"monitor",
+	"screen"
+    ]
+}

@@ -1,0 +1,2 @@
+recursive-include ovos_skill_display_control/locale *
+include *.txt
