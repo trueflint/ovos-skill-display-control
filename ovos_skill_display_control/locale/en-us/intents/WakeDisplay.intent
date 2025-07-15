@@ -1,30 +1,4 @@
-display on
-monitor on
-screen on
-turn display on
-turn monitor on
-turn on display
-turn on monitor
-turn on screen
-turn on the display
-turn on the monitor
-turn on the screen
-turn on your display
-turn on your monitor
-turn on your screen
-turn screen on
-turn the display on
-turn the monitor on
-turn the screen on
-turn your display on
-turn your monitor on
-turn your screen on
-wake display
-wake monitor
-wake screen
-wake the display
-wake the monitor
-wake the screen
-wake your display
-wake your monitor
-wake your screen
+[display|monitor|screen] on
+wake [|the|your] [display|monitor|screen]
+turn [|the|your] [display|monitor|screen] on
+turn on [|the|your] [display|monitor|screen]

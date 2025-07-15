@@ -1,30 +1,7 @@
-display off
-monitor off
-screen off
-sleep display
-sleep monitor
-sleep screen
-sleep the display
-sleep the monitor
-sleep the screen
-sleep your display
-sleep your monitor
-sleep your screen
-turn display off
-turn monitor off
-turn off display
-turn off monitor
-turn off screen
-turn off the display
-turn off the monitor
-turn off the screen
-turn off your display
-turn off your monitor
-turn off your screen
-turn screen off
-turn the display off
-turn the monitor off
-turn the screen off
-turn your display off
-turn your monitor off
-turn your screen off
+[display|monitor|screen] off
+put [|the|your] [display|monitor|screen] to sleep
+shut [|the|your] screen down
+shut down [|the|your] screen
+sleep [|the|your] [display|monitor|screen]
+turn [|the|your] [display|monitor|screen] off
+turn off [|the|your] [display|monitor|screen]
