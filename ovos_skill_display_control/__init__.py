@@ -52,8 +52,8 @@ class DisplayControlSkill(OVOSSkill):
         self.settings_change_callback = self.on_settings_changed
         # below is a custom event, system event specs found at
         # https://openvoiceos.github.io/message_spec/
-        self.add_event("ovos.display.sleep", self.handle_sleep_display)
-        self.add_event("ovos.display.wake", self.handle_wake_display)
+        self.add_event("ovos.display.sleep", self.handle_sleep_display_event)
+        self.add_event("ovos.display.wake", self.handle_wake_display_event)
 
     def on_settings_changed(self):
         """This method is called when the skill settings are changed."""
