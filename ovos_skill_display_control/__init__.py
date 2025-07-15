@@ -7,7 +7,8 @@ from ovos_workshop.skills import OVOSSkill
 import subprocess
 
 DEFAULT_SETTINGS = {
-    "log_level": "WARNING"
+    "log_level": "WARNING",
+    "display_device": "HDMI-A-1"
 }
 
 class DisplayControlSkill(OVOSSkill):
@@ -49,13 +50,10 @@ class DisplayControlSkill(OVOSSkill):
         self.settings.merge(DEFAULT_SETTINGS, new_only=True)
         # set a callback to be called when settings are changed
         self.settings_change_callback = self.on_settings_changed
-        # (custom) event handler setup example
         # below is a custom event, system event specs found at
         # https://openvoiceos.github.io/message_spec/
-        # this can be tested using `mana` (https://github.com/NeonGeckoCom/neon-mana-utils)
-        # `mana send-message hello.world`
-#        self.add_event("hello.world", self.handle_hello_world_intent)
-#        self.my_var = "hello world"
+        self.add_event("ovos.display.sleep", self.handle_sleep_display)
+        self.add_event("ovos.display.wake", self.handle_wake_display)
 
     def on_settings_changed(self):
         """This method is called when the skill settings are changed."""
@@ -69,14 +67,32 @@ class DisplayControlSkill(OVOSSkill):
         """
         return self.settings.get("log_level", "INFO")
 
+    def sleep_display(self):
+        subprocess.run(["wlr-randr", "--output", self.settings.get("display_device"), "--off"])
+
+    def wake_display(self):
+        subprocess.run(["wlr-randr", "--output", self.settings.get("display_device"), "--on"])
+
+    def handle_sleep_display_event(self, message):
+        LOG.info("ovos-skill-display-control received ovos.display.sleep event.")
+        self.sleep_display()
+        self.bus.emit(message.reply("ovos.display.sleep.response", {"success": True}))
+
+    def handle_wake_display_event(self, message):
+        LOG.info("ovos-skill-display-control received ovos.display.wake event.")
+        self.wake_display()
+        self.bus.emit(message.reply("ovos.display.wake.response", {"success": True}))
+
     @intent_handler("SleepDisplay.intent")
-    def handle_sleep_display(self, message):
+    def handle_sleep_display_intent(self, message):
         """This is a Padatious intent handler.
         It is triggered using a list of sample phrases."""
-        subprocess.run(["wlr-randr", "--output", "HDMI-A-1", "--off"])
+        LOG.info("ovos-skill-display-control received SleepDisplay intent.")
+        self.sleep_display()
         self.speak_dialog("display.off")
 
     @intent_handler("WakeDisplay.intent")
-    def handle_wake_display(self, message):
-        subprocess.run(["wlr-randr", "--output", "HDMI-A-1", "--on"])
+    def handle_wake_display_intent(self, message):
+        LOG.info("ovos-skill-display-control received WakeDisplay intent.")
+        self.wake_display()
         self.speak_dialog("display.on")
