@@ -54,6 +54,7 @@ class DisplayControlSkill(OVOSSkill):
         # https://openvoiceos.github.io/message_spec/
         self.add_event("ovos.display.sleep", self.handle_sleep_display_event)
         self.add_event("ovos.display.wake", self.handle_wake_display_event)
+        self.add_event("ovos.display.status", self.handle_display_status_event)
 
     def on_settings_changed(self):
         """This method is called when the skill settings are changed."""
@@ -66,6 +67,39 @@ class DisplayControlSkill(OVOSSkill):
         This will reflect live changes to settings.json files (local or from backend)
         """
         return self.settings.get("log_level", "INFO")
+
+    def is_display_awake(self):
+        """Returns True if the display in
+        settings.get("display_device") is awake and False if it's
+        asleep. If it can't be determined, returns None.
+        """
+        display = self.settings.get("display_device")
+        try:
+            output = subprocess.check_output(["wlr-randr"], text=True)
+            lines = output.splitlines()
+
+            in_block = False
+            for line in lines:
+                stripped = line.strip()
+
+                # Start of HDMI-A-1 block
+                if stripped.startswith(display):
+                    in_block = True
+                    continue
+
+                # Reached a new output block
+                if in_block and not line.startswith(" "):
+                    break
+
+                # Inside the HDMI-A-1 block
+                if in_block and stripped.lower().startswith("enabled:"):
+                    status = stripped.split(":")[1].strip().lower()
+                    return status == "yes"
+
+        except Exception as e:
+            LOG.error(f"Failed to check display state: {e}")
+
+        return None  # Unknown or not found
 
     def sleep_display(self):
         subprocess.run(["wlr-randr", "--output", self.settings.get("display_device"), "--off"])
@@ -82,6 +116,11 @@ class DisplayControlSkill(OVOSSkill):
         LOG.info("ovos-skill-display-control received ovos.display.wake event.")
         self.wake_display()
         self.bus.emit(message.reply("ovos.display.wake.response", {"success": True}))
+
+    def handle_display_status_event(self, message):
+        LOG.info("ovos-skill-display-control received ovos.display.status event.")
+        status = self.is_display_awake()
+        self.bus.emit(message.reply("ovos.display.status.response", {"status": status}))
 
     @intent_handler("SleepDisplay.intent")
     def handle_sleep_display_intent(self, message):
