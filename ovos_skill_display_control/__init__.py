@@ -111,11 +111,13 @@ class DisplayControlSkill(OVOSSkill):
         LOG.info("ovos-skill-display-control received ovos.display.sleep event.")
         self.sleep_display()
         self.bus.emit(message.reply("ovos.display.sleep.response", {"success": True}))
+        self.speak_dialog("display.off")
 
     def handle_wake_display_event(self, message):
         LOG.info("ovos-skill-display-control received ovos.display.wake event.")
         self.wake_display()
         self.bus.emit(message.reply("ovos.display.wake.response", {"success": True}))
+        self.speak_dialog("display.on")
 
     def handle_display_status_event(self, message):
         LOG.info("ovos-skill-display-control received ovos.display.status event.")
@@ -124,14 +126,18 @@ class DisplayControlSkill(OVOSSkill):
 
     @intent_handler("SleepDisplay.intent")
     def handle_sleep_display_intent(self, message):
-        """This is a Padatious intent handler.
-        It is triggered using a list of sample phrases."""
+        """Handle SleepDisplay intents from Padatious.
+
+        This is done by sending an ovos.display.sleep event on the
+        OVOS message bus, which handle_sleep_display_event will handle
+        as the registered handler for that event. It's done this way
+        rather than calling sleep_display directly from here in order
+        to allow other skills or other agents to also be aware of when
+        the display changes state."""
         LOG.info("ovos-skill-display-control received SleepDisplay intent.")
-        self.sleep_display()
-        self.speak_dialog("display.off")
+        self.bus.emit(message.reply("ovos.display.sleep", {"source": "intent"}))
 
     @intent_handler("WakeDisplay.intent")
     def handle_wake_display_intent(self, message):
         LOG.info("ovos-skill-display-control received WakeDisplay intent.")
-        self.wake_display()
-        self.speak_dialog("display.on")
+        self.bus.emit(message.reply("ovos.display.wake", {"source": "intent"}))
