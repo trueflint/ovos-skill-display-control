@@ -11,6 +11,15 @@ DEFAULT_SETTINGS = {
     "display_device": "HDMI-A-1"
 }
 
+# Message bus event tokens
+EVENT_PREFIX = "skill.display-control"
+EVENT_SLEEP = f"{EVENT_PREFIX}.sleep"
+EVENT_SLEEP_RESPONSE = f"{EVENT_SLEEP}.response"
+EVENT_WAKE = f"{EVENT_PREFIX}.wake"
+EVENT_WAKE_RESPONSE = f"{EVENT_WAKE}.response"
+EVENT_STATUS = f"{EVENT_PREFIX}.status"
+EVENT_STATUS_RESPONSE = f"{EVENT_STATUS}.response"
+
 class DisplayControlSkill(OVOSSkill):
     def __init__(self, *args, **kwargs):
         """The __init__ method is called when the Skill is first constructed.
@@ -52,9 +61,9 @@ class DisplayControlSkill(OVOSSkill):
         self.settings_change_callback = self.on_settings_changed
         # below is a custom event, system event specs found at
         # https://openvoiceos.github.io/message_spec/
-        self.add_event("ovos.display.sleep", self.handle_sleep_display_event)
-        self.add_event("ovos.display.wake", self.handle_wake_display_event)
-        self.add_event("ovos.display.status", self.handle_display_status_event)
+        self.add_event(EVENT_SLEEP, self.handle_sleep_display_event)
+        self.add_event(EVENT_WAKE, self.handle_wake_display_event)
+        self.add_event(EVENT_STATUS, self.handle_display_status_event)
 
     def on_settings_changed(self):
         """This method is called when the skill settings are changed."""
@@ -108,21 +117,21 @@ class DisplayControlSkill(OVOSSkill):
         subprocess.run(["wlr-randr", "--output", self.settings.get("display_device"), "--on"])
 
     def handle_sleep_display_event(self, message):
-        LOG.info("ovos-skill-display-control received ovos.display.sleep event.")
+        LOG.debug(f"ovos-skill-display-control received {EVENT_SLEEP} event.")
         self.sleep_display()
-        self.bus.emit(message.reply("ovos.display.sleep.response", {"success": True}))
+        self.bus.emit(message.reply(EVENT_SLEEP_RESPONSE, {"success": True}))
         self.speak_dialog("display.off")
 
     def handle_wake_display_event(self, message):
-        LOG.info("ovos-skill-display-control received ovos.display.wake event.")
+        LOG.debug(f"ovos-skill-display-control received {EVENT_WAKE} event.")
         self.wake_display()
-        self.bus.emit(message.reply("ovos.display.wake.response", {"success": True}))
+        self.bus.emit(message.reply(EVENT_WAKE_RESPONSE, {"success": True}))
         self.speak_dialog("display.on")
 
     def handle_display_status_event(self, message):
-        LOG.info("ovos-skill-display-control received ovos.display.status event.")
+        LOG.debug(f"ovos-skill-display-control received {EVENT_STATUS} event.")
         status = self.is_display_awake()
-        self.bus.emit(message.reply("ovos.display.status.response", {"status": status}))
+        self.bus.emit(message.reply(EVENT_STATUS_RESPONSE, {"status": status}))
 
     @intent_handler("SleepDisplay.intent")
     def handle_sleep_display_intent(self, message):
@@ -135,9 +144,9 @@ class DisplayControlSkill(OVOSSkill):
         to allow other skills or other agents to also be aware of when
         the display changes state."""
         LOG.info("ovos-skill-display-control received SleepDisplay intent.")
-        self.bus.emit(message.reply("ovos.display.sleep", {"source": "intent"}))
+        self.bus.emit(message.reply(EVENT_SLEEP, {"source": "intent"}))
 
     @intent_handler("WakeDisplay.intent")
     def handle_wake_display_intent(self, message):
         LOG.info("ovos-skill-display-control received WakeDisplay intent.")
-        self.bus.emit(message.reply("ovos.display.wake", {"source": "intent"}))
+        self.bus.emit(message.reply(EVENT_WAKE, {"source": "intent"}))
