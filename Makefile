@@ -7,7 +7,7 @@ install:
 	pip install .
 
 uninstall:
-	pip uninstall $(PROJECT)
+	pip uninstall -y $(PROJECT)
 
 reinstall: uninstall install
 
