@@ -65,6 +65,9 @@ class DisplayControlSkill(OVOSSkill):
         self.add_event(EVENT_WAKE, self.handle_wake_display_event)
         self.add_event(EVENT_STATUS, self.handle_display_status_event)
 
+        # Event handler for wake word detection
+        self.add_event("recognizer_loop:wakeword", self.handle_wakeword)
+
     def on_settings_changed(self):
         """This method is called when the skill settings are changed."""
         LOG.info("Settings changed!")
@@ -120,18 +123,26 @@ class DisplayControlSkill(OVOSSkill):
         LOG.debug(f"ovos-skill-display-control received {EVENT_SLEEP} event.")
         self.sleep_display()
         self.bus.emit(message.reply(EVENT_SLEEP_RESPONSE, {"success": True}))
-        self.speak_dialog("display.off")
+#        self.speak_dialog("display.off")
 
     def handle_wake_display_event(self, message):
         LOG.debug(f"ovos-skill-display-control received {EVENT_WAKE} event.")
         self.wake_display()
         self.bus.emit(message.reply(EVENT_WAKE_RESPONSE, {"success": True}))
-        self.speak_dialog("display.on")
+#        self.speak_dialog("display.on")
 
     def handle_display_status_event(self, message):
         LOG.debug(f"ovos-skill-display-control received {EVENT_STATUS} event.")
         status = self.is_display_awake()
         self.bus.emit(message.reply(EVENT_STATUS_RESPONSE, {"status": status}))
+
+    def handle_wakeword(self, message):
+        """Detect the wakeword and wake the screen if necessary."""
+        status = self.is_display_awake()
+        # No need to wake the display if it's already awake.
+        if status:
+            return None
+        self.bus.emit(message.reply(EVENT_WAKE, {"source": "bus"}))
 
     @intent_handler("SleepDisplay.intent")
     def handle_sleep_display_intent(self, message):
