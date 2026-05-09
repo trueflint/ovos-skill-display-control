@@ -35,21 +35,35 @@ blank black screen still produces significant light.
 
 This skill listens for the following events on the OVOS message bus:
 
-### `ovos.display.sleep`
+### `skill.display-control.sleep`
 
 Turns off the configured display (via `wlr-randr`).  
-**Returns:** `ovos.display.sleep.response` with `{ "success": true }`
+**Returns:** `skill.display-control.sleep.response` with `{ "success": true }`
 
 Example use from another skill:
-`self.bus.emit(Message("ovos.display.sleep"))`
+`self.bus.emit(Message("skill.display-control.sleep"))`
 
-### `ovos.display.wake`
+### `skill.display-control.wake`
 
 Turns on the configured display (via `wlr-randr`).  
-**Returns:** `ovos.display.wake.response` with `{ "success": true }`
+**Returns:** `skill.display-control.wake.response` with `{ "success": true }`
 
 Example use from another skill:
-`self.bus.emit(Message("ovos.display.wake"))`
+`self.bus.emit(Message("skill.display-control.wake"))`
+
+### `skill.display-control.status`
+
+Queries the current display state.  
+**Returns:** `skill.display-control.status.response` with `{ "status": true }` if awake,
+`{ "status": false }` if asleep, or `{ "status": null }` if the state cannot be determined.
+
+Example use from another skill:
+`self.bus.emit(Message("skill.display-control.status"))`
+
+## Wakeword Behavior
+
+When a wakeword is detected, this skill automatically wakes the display if it is asleep.
+This ensures the screen is on and visible whenever OVOS is actively listening.
 
 ## Credits
 
